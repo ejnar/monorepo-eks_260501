@@ -1,0 +1,52 @@
+plugins {
+    id 'org.springframework.boot' version '3.2.5' apply false
+    id 'io.spring.dependency-management' version '1.1.4' apply false
+    id 'java' // apply false
+}
+
+ext {
+    services = [
+            "service-a",
+            "service-b"
+    ]
+
+    javaVersion = 17
+}
+
+allprojects {
+    group = 'com.example'
+    version = '1.0.0'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+
+    apply plugin: 'java'
+
+    java {
+        sourceCompatibility = JavaVersion.toVersion(rootProject.ext.javaVersion)
+    }
+
+    tasks.withType(Test) {
+        useJUnitPlatform()
+    }
+}
+
+configure(subprojects.findAll {
+    rootProject.ext.services.contains(it.name)
+}) {
+
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    dependencies {
+        implementation platform('software.amazon.awssdk:bom:2.25.53')
+
+        implementation 'software.amazon.awssdk:secretsmanager'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+}

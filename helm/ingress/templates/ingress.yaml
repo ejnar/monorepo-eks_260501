@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: monorepo-ingress
+  namespace: default
+  annotations:
+    # AWS ALB Controller annotations
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.acmCertArn | quote }}
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/success-codes: "200"
+    # CORS
+    alb.ingress.kubernetes.io/actions.cors-headers: >
+      {"type":"fixed-response","fixedResponseConfig":{"contentType":"text/plain","statusCode":"200","messageBody":"OK"}}
+spec:
+  ingressClassName: alb
+  rules:
+    - host: {{ .Values.domain }}
+      http:
+        paths:
+          - path: /api/v1/items
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.serviceA.name }}
+                port:
+                  number: {{ .Values.serviceA.port }}
+          - path: /api/v1/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.serviceB.name }}
+                port:
+                  number: {{ .Values.serviceB.port }}

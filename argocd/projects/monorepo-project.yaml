@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: monorepo
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Monorepo project containing service-a and service-b
+  sourceRepos:
+    - 'https://github.com/your-org/monorepo.git'
+  destinations:
+    - namespace: default
+      server: https://kubernetes.default.svc
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: 'apps'
+      kind: Deployment
+    - group: ''
+      kind: Service
+    - group: ''
+      kind: ServiceAccount
+    - group: 'networking.k8s.io'
+      kind: Ingress
+    - group: 'autoscaling'
+      kind: HorizontalPodAutoscaler
+    - group: 'policy'
+      kind: PodDisruptionBudget
+  roles:
+    - name: developer
+      description: Developer read-only access
+      policies:
+        - p, proj:monorepo:developer, applications, get, monorepo/*, allow
+      groups:
+        - dev-team

@@ -1,0 +1,54 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/your-org/service-b
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8081
+
+serviceAccount:
+  create: true
+  name: service-b-sa
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+env:
+  AWS_REGION: us-east-1
+  AWS_SECRETS_ENABLED: "true"
+  REDIS_HOST: "redis-master.default.svc.cluster.local"
+  REDIS_PORT: "6379"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8081
+  initialDelaySeconds: 40
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8081
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

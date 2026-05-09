@@ -1,0 +1,10 @@
+bootJar {
+    archiveFileName = "service-a.jar"
+    //enabled = false
+    // mainClass = 'com.example.ServiceAApplication'
+}
+
+// Groovy DSL
+tasks.named('bootJar') {
+    mainClass = 'com.example.ServiceAApplication'
+}

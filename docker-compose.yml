@@ -1,0 +1,81 @@
+version: '3.9'
+
+services:
+  service-a:
+    build:
+      context: .
+      dockerfile: services/service-a/Dockerfile
+    image: service-a:local
+    container_name: service-a
+    ports:
+      - "8080:8080"
+    environment:
+      - AWS_SECRETS_ENABLED=false
+      - AWS_REGION=us-east-1
+      - SPRING_PROFILES_ACTIVE=local
+    depends_on:
+      - localstack
+    networks:
+      - monorepo-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  service-b:
+    build:
+      context: .
+      dockerfile: services/service-b/Dockerfile
+    image: service-b:local
+    container_name: service-b
+    ports:
+      - "8081:8081"
+    environment:
+      - AWS_SECRETS_ENABLED=false
+      - AWS_REGION=us-east-1
+      - SPRING_PROFILES_ACTIVE=local
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+      - localstack
+    networks:
+      - monorepo-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - monorepo-net
+
+  localstack:
+    image: localstack/localstack:3.4
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=secretsmanager
+      - AWS_DEFAULT_REGION=us-east-1
+      - EAGER_SERVICE_LOADING=1
+    volumes:
+      - "./scripts/localstack-init.sh:/etc/localstack/init/ready.d/init.sh"
+      - localstack-data:/var/lib/localstack
+    networks:
+      - monorepo-net
+
+networks:
+  monorepo-net:
+    driver: bridge
+
+volumes:
+  localstack-data:

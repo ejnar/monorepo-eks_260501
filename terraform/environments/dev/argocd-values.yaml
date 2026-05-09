@@ -1,0 +1,24 @@
+server:
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: false  # Exposed via kubectl port-forward or separate ingress
+
+configs:
+  params:
+    server.insecure: "true"  # TLS terminated at ALB
+
+repoServer:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+applicationSet:
+  enabled: true
+
+notifications:
+  enabled: true

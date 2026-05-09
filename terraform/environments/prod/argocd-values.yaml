@@ -1,0 +1,32 @@
+server:
+  service:
+    type: ClusterIP
+  replicas: 2
+  resources:
+    limits:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+configs:
+  params:
+    server.insecure: "true"
+
+repoServer:
+  replicas: 2
+  resources:
+    limits:
+      cpu: 1
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+applicationSet:
+  enabled: true
+  replicas: 2
+
+notifications:
+  enabled: true

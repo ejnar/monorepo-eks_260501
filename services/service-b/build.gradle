@@ -1,0 +1,10 @@
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+}
+
+bootJar {
+    archiveFileName = "service-b.jar"
+    // enabled = false
+    // mainClass = 'com.example.ServiceBApplication'
+}

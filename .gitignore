@@ -1,0 +1,46 @@
+# Gradle
+.gradle/
+build/
+out/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+.terraform.lock.hcl
+terraform/environments/**/terraform.tfvars
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Secrets - NEVER commit these
+*.pem
+*.key
+secrets.yaml
+*secrets*.env

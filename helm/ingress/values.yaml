@@ -1,0 +1,10 @@
+domain: "example.com"
+acmCertArn: ""  # arn:aws:acm:us-east-1:ACCOUNT:certificate/CERT-ID
+
+serviceA:
+  name: service-a
+  port: 80
+
+serviceB:
+  name: service-b
+  port: 80

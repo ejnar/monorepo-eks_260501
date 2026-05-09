@@ -1,0 +1,4 @@
+rootProject.name = 'multi-service-platform260501'
+
+include 'services:service-a'
+include 'services:service-b'
