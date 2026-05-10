@@ -95,6 +95,12 @@ monorepo/
 
 ## Quick Start — Local Development
 
+## Git Useful commands
+```bash
+git status
+git switch -c feature-login
+```
+
 ```bash
 # 1. Start all services locally (includes Redis + LocalStack)
 docker compose up --build
@@ -143,7 +149,6 @@ curl -X POST http://localhost:8081/api/v1/notifications/send \
 ```
 
 ---
-
 ## Infrastructure Deployment (Terraform)
 
 ### 1. Bootstrap S3 Backend (once)
@@ -168,6 +173,19 @@ terraform plan
 terraform apply
 ```
 
+Recommended enterprise workflow
+```bash
+# Create:
+terraform init
+terraform fmt -recursive 
+terraform validate
+terraform plan -out=tfplan
+terraform apply tfplan
+
+# Cleanup:
+terraform destroy
+```
+
 Useful commands
 ```bash
 # Validate syntax:
@@ -185,21 +203,6 @@ terraform output
 # Refresh AWS state:
 terraform refresh
 ```
-
-Recommended enterprise workflow
-```bash
-# Create:
-terraform init
-terraform fmt -recursive 
-terraform validate
-terraform plan -out=tfplan
-terraform apply tfplan
-
-# Cleanup:
-terraform destroy
-
-```
-
 
 ### 3. Configure kubectl
 ```bash

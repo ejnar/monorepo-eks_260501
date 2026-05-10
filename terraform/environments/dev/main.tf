@@ -21,7 +21,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "your-tfstate-bucket-dev"
+    bucket         = "monorepo-eks-260501-tfstate-bucket-dev"
     key            = "monorepo/dev/terraform.tfstate"
     region         = "us-east-1"
     dynamodb_table = "terraform-lock"

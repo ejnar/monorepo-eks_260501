@@ -11,7 +11,7 @@ metadata:
 spec:
   project: monorepo
   source:
-    repoURL: https://github.com/your-org/monorepo.git
+    repoURL: https://github.com/ejnar/monorepo-eks_260501.git
     targetRevision: HEAD
     path: helm/service-a
     helm:

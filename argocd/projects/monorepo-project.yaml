@@ -8,7 +8,7 @@ metadata:
 spec:
   description: Monorepo project containing service-a and service-b
   sourceRepos:
-    - 'https://github.com/your-org/monorepo.git'
+    - 'https://github.com/ejnar/monorepo-eks_260501.git'
   destinations:
     - namespace: default
       server: https://kubernetes.default.svc

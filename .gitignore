@@ -44,3 +44,4 @@ logs/
 *.key
 secrets.yaml
 *secrets*.env
+PRIVATE.md
