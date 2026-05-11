@@ -27,6 +27,7 @@ out/
 *.tfplan
 .terraform.lock.hcl
 terraform/environments/**/terraform.tfvars
+tfplan
 
 # Docker
 .dockerignore

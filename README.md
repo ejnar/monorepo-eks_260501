@@ -181,6 +181,10 @@ terraform fmt -recursive
 terraform validate
 terraform plan -out=tfplan
 terraform apply tfplan
+# Verify
+terraform output
+terraform state list
+terraform plan
 
 # Cleanup:
 terraform destroy
@@ -395,3 +399,80 @@ The root app uses the App-of-Apps pattern — it watches argocd/apps/ and automa
 the service-a and service-b Application objects. From this point the loop is closed: 
 merge to main → CI builds and pushes the image → CI commits a new tag into helm/*/values.yaml → ArgoCD 
 detects the change and rolls out the new version, with automatic rollback on failure.You said: Wh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Warning: Helm release "" was created but has a failed status. Use the `helm` command to investigate the error, correct it, then run Terraform again.
+│
+│   with helm_release.argocd,
+│   on main.tf line 177, in resource "helm_release" "argocd":
+│  177: resource "helm_release" "argocd" {
+│
+╵
+╷
+│ Error: 5 errors occurred:
+│ 	* Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": no endpoints available for service "aws-load-balancer-webhook-service"
+│ 	* Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": no endpoints available for service "aws-load-balancer-webhook-service"
+│ 	* Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": no endpoints available for service "aws-load-balancer-webhook-service"
+│ 	* Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": no endpoints available for service "aws-load-balancer-webhook-service"
+│ 	* Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": no endpoints available for service "aws-load-balancer-webhook-service"
+│
+│
+│
+│   with helm_release.argocd,
+│   on main.tf line 177, in resource "helm_release" "argocd":
+│  177: resource "helm_release" "argocd" {
+│
+╵
+╷
+│ Error: could not download chart: path "./../../../../helm/service-a" not found
+│
+│   with helm_release.service_a,
+│   on main.tf line 193, in resource "helm_release" "service_a":
+│  193: resource "helm_release" "service_a" {
+│
+╵
+╷
+│ Error: could not download chart: path "./../../../../helm/service-b" not found
+│
+│   with helm_release.service_b,
+│   on main.tf line 230, in resource "helm_release" "service_b":
+│  230: resource "helm_release" "service_b" {
+│
+╵
+╷
+│ Error: creating Secrets Manager Secret (monorepo-dev-app-secret-key): operation error Secrets Manager: CreateSecret, https response error StatusCode: 400, RequestID: af8699a5-2f7c-410b-86fa-b5aeb3f5d34f, InvalidRequestException: You can't create this secret because a secret with this name is already scheduled for deletion.
+│
+│   with module.secrets.aws_secretsmanager_secret.app_secret_key,
+│   on ../../modules/secrets/main.tf line 13, in resource "aws_secretsmanager_secret" "app_secret_key":
+│   13: resource "aws_secretsmanager_secret" "app_secret_key" {
+│
+╵
+╷
+│ Error: creating Secrets Manager Secret (monorepo-dev-notification-api-key): operation error Secrets Manager: CreateSecret, https response error StatusCode: 400, RequestID: 1470190a-6bcb-4aa6-a3ac-aee43405e5eb, InvalidRequestException: You can't create this secret because a secret with this name is already scheduled for deletion.
+│
+│   with module.secrets.aws_secretsmanager_secret.notification_api_key,
+│   on ../../modules/secrets/main.tf line 25, in resource "aws_secretsmanager_secret" "notification_api_key":
+│   25: resource "aws_secretsmanager_secret" "notification_api_key" {
+│
+╵
+Releasing state lock. This may take a few moments...
+
+

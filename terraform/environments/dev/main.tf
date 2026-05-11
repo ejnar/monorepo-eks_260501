@@ -193,7 +193,7 @@ resource "helm_release" "argocd" {
 resource "helm_release" "service_a" {
   name      = "service-a"
   namespace = "default"
-  chart     = var.helm_chart_base_url != "" ? "${var.helm_chart_base_url}/service-a" : "${path.module}/../../../../helm/service-a"
+  chart     = var.helm_chart_base_url != "" ? "${var.helm_chart_base_url}/service-a" : "${path.module}/../../../helm/service-a"
   timeout   = 300
 
   set {
@@ -230,7 +230,7 @@ resource "helm_release" "service_a" {
 resource "helm_release" "service_b" {
   name      = "service-b"
   namespace = "default"
-  chart     = var.helm_chart_base_url != "" ? "${var.helm_chart_base_url}/service-b" : "${path.module}/../../../../helm/service-b"
+  chart     = var.helm_chart_base_url != "" ? "${var.helm_chart_base_url}/service-b" : "${path.module}/../../../helm/service-b"
   timeout   = 300
 
   set {
@@ -266,7 +266,7 @@ resource "helm_release" "service_b" {
 resource "helm_release" "ingress" {
   name      = "app-ingress"
   namespace = "default"
-  chart     = var.helm_chart_base_url != "" ? "${var.helm_chart_base_url}/ingress" : "${path.module}/../../../../helm/ingress"
+  chart     = var.helm_chart_base_url != "" ? "${var.helm_chart_base_url}/ingress" : "${path.module}/../../../helm/ingress"
   timeout   = 300
 
   set {
