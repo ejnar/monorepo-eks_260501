@@ -323,7 +323,12 @@ aws secretsmanager update-secret \
 ## AWS command:
 ```bash
 # List certificates
-aws acm list-certificates --profile admin-us
+aws acm list-certificates --profile xxxx
+
+aws s3 ls --profile xxxx
+aws s3api list-buckets --profile xxxx
+
+aws dynamodb describe-table --table-name terraform-lock --profile xxxx
 
 ```
 
@@ -338,6 +343,7 @@ aws acm list-certificates --profile admin-us
 - [ ] Replace `your-tfstate-bucket-dev/prod` with real S3 bucket names
 - [ ] Set real `domain_name` values in `terraform.tfvars`
 - [ ] Set real `acm_certificate_arn` after certificate validation
+- 
 - [ ] Update ArgoCD `repoURL` in `argocd/apps/` to your real repo URL
 - [ ] Set strong secret values in Secrets Manager (not defaults)
 - [ ] Review `public_access_cidrs` in EKS module for your IP allowlist

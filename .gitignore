@@ -45,3 +45,4 @@ logs/
 secrets.yaml
 *secrets*.env
 PRIVATE.md
+*bak*

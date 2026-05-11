@@ -21,16 +21,19 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "your-tfstate-bucket-prod"
-    key            = "monorepo/prod/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-lock"
-    encrypt        = true
+    bucket = "monorepo-eks-260501-tfstate-bucket-dev"
+    key    = "monorepo/dev/terraform.tfstate"
+    region = "us-east-1"
+    # dynamodb_table = "terraform-lock"
+    use_lockfile = true
+    encrypt      = true
+    profile      = "admin-us"
   }
 }
 
 provider "aws" {
-  region = var.aws_region
+  profile = "admin-us"
+  region  = var.aws_region
   default_tags {
     tags = local.common_tags
   }
@@ -59,8 +62,8 @@ provider "helm" {
 }
 
 locals {
-  env      = "prod"
-  name     = "monorepo-${local.env}"
+  env  = "dev"
+  name = "monorepo-${local.env}"
   common_tags = {
     Environment = local.env
     Project     = "monorepo"
@@ -69,34 +72,34 @@ locals {
 }
 
 module "networking" {
-  source             = "../../modules/networking"
+  source             = "../../../modules/networking"
   name               = local.name
-  vpc_cidr           = "10.1.0.0/16"
-  availability_zones = ["${var.aws_region}a", "${var.aws_region}b", "${var.aws_region}c"]
+  vpc_cidr           = "10.0.0.0/16"
+  availability_zones = ["${var.aws_region}a", "${var.aws_region}b"]
   cluster_name       = local.name
   tags               = local.common_tags
 }
 
 module "eks" {
-  source              = "../../modules/eks"
-  cluster_name        = local.name
-  public_subnet_ids   = module.networking.public_subnet_ids
-  private_subnet_ids  = module.networking.private_subnet_ids
-  node_instance_types = ["t3.large"]
-  node_desired_size   = 3
-  node_min_size       = 2
-  node_max_size       = 8
-  tags                = local.common_tags
+  source             = "../../../modules/eks"
+  cluster_name       = local.name
+  public_subnet_ids  = module.networking.public_subnet_ids
+  private_subnet_ids = module.networking.private_subnet_ids
+  node_desired_size  = 2
+  node_min_size      = 1
+  node_max_size      = 3
+  tags               = local.common_tags
 }
 
 module "secrets" {
-  source            = "../bak/secrets"
+  source            = "../secrets"
   name              = local.name
   oidc_provider_arn = module.eks.oidc_provider_arn
   oidc_provider_url = module.eks.oidc_provider_url
   tags              = local.common_tags
 }
 
+# AWS Load Balancer Controller via Helm
 resource "helm_release" "aws_lb_controller" {
   name       = "aws-load-balancer-controller"
   repository = "https://aws.github.io/eks-charts"
@@ -117,6 +120,7 @@ resource "helm_release" "aws_lb_controller" {
   depends_on = [module.eks]
 }
 
+# ArgoCD via Helm
 resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
@@ -124,41 +128,65 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
   version          = "6.7.14"
-  values           = [file("${path.module}/argocd-values.yaml")]
-  depends_on       = [module.eks]
+
+  values = [file("${path.module}/argocd-values.yaml")]
+
+  depends_on = [module.eks]
 }
 
+# Service A via Helm
 resource "helm_release" "service_a" {
   name      = "service-a"
   chart     = "${path.root}/../../../../helm/service-a"
   namespace = "default"
-  set { name = "image.tag"; value = var.service_a_image_tag }
-  set { name = "replicaCount"; value = "3" }
+
+  set {
+    name  = "image.tag"
+    value = var.service_a_image_tag
+  }
+
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = module.secrets.service_a_irsa_role_arn
   }
+
   depends_on = [module.eks, helm_release.aws_lb_controller]
 }
 
+# Service B via Helm
 resource "helm_release" "service_b" {
   name      = "service-b"
   chart     = "${path.root}/../../../../helm/service-b"
   namespace = "default"
-  set { name = "image.tag"; value = var.service_b_image_tag }
-  set { name = "replicaCount"; value = "3" }
+
+  set {
+    name  = "image.tag"
+    value = var.service_b_image_tag
+  }
+
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = module.secrets.service_b_irsa_role_arn
   }
+
   depends_on = [module.eks, helm_release.aws_lb_controller]
 }
 
+# Ingress via Helm
 resource "helm_release" "ingress" {
   name      = "app-ingress"
   chart     = "${path.root}/../../../../helm/ingress"
   namespace = "default"
-  set { name = "domain"; value = var.domain_name }
-  set { name = "acmCertArn"; value = var.acm_certificate_arn }
-  depends_on = [helm_release.service_a, helm_release.service_b]
+
+  set {
+    name  = "domain"
+    value = var.domain_name
+  }
+
+  set {
+    name  = "acmCertArn"
+    value = var.acm_certificate_arn
+  }
+
+  depends_on = [helm_release.service_a, helm_release.service_b, helm_release.aws_lb_controller]
 }
