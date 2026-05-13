@@ -222,7 +222,8 @@ kubectl get nodes
 ```bash
 # Get ArgoCD admin password
 kubectl -n argocd get secret argocd-initial-admin-secret \
-  -o jsonpath="{.data.password}" | base64 -d
+  -o jsonpath="{.data.password}" | base64 -d        
+aNMpZuZ0Hz0Oc7Lc
 
 # Port-forward ArgoCD UI
 kubectl port-forward svc/argocd-server -n argocd 8090:80
@@ -307,7 +308,33 @@ To rotate a secret:
 aws secretsmanager update-secret \
   --secret-id app-secret-key \
   --secret-string '{"value":"new-secret-value"}'
+  
+  
+# Force-delete both secrets instantly (no waiting period)
+aws secretsmanager delete-secret \
+  --secret-id monorepo-dev-app-secret-key \
+  --force-delete-without-recovery \
+  --region us-east-1
+
+aws secretsmanager delete-secret \
+  --secret-id monorepo-dev-notification-api-key \
+  --force-delete-without-recovery \
+  --region us-east-1  
 ```
+
+
+## AWS command:
+```bash
+# List certificates
+aws acm list-certificates --profile xxxx
+
+aws s3 ls --profile xxxx
+aws s3api list-buckets --profile xxxx
+
+aws dynamodb describe-table --table-name terraform-lock --profile xxxx
+
+```
+
 
 ---
 ### AWS lib
@@ -324,17 +351,7 @@ aws secretsmanager update-secret \
 | CloudWatch      | `software.amazon.awssdk:cloudwatch`     |
 | IAM             | `software.amazon.awssdk:iam`            |
 
-## AWS command:
-```bash
-# List certificates
-aws acm list-certificates --profile xxxx
 
-aws s3 ls --profile xxxx
-aws s3api list-buckets --profile xxxx
-
-aws dynamodb describe-table --table-name terraform-lock --profile xxxx
-
-```
 
 ---
 ## Customization Checklist
@@ -369,13 +386,17 @@ branch protection: require at least one PR review and require all status checks 
 No one pushes directly to main — everything flows through pull requests.
 
 ### Phase 2 — Scaffold and push the structure
-Clone the repo locally, create the full folder tree (services/service-a, services/service-b, 
-terraform/, helm/, argocd/, .github/workflows/), add a root settings.gradle that includes both services as subprojects, 
+Clone the repo locally, create the full folder tree 
+(services/service-a, services/service-b, terraform/, helm/, argocd/, .github/workflows/), 
+add a root settings.gradle that includes both services as subprojects, 
 then commit and push. Add a .gitignore covering build/, .gradle/, .terraform/, *.tfstate, and .DS_Store at minimum.
 
 ### Phase 3 — Configure GitHub Actions
-Add .github/workflows/ci-cd.yml. The pipeline runs five jobs in sequence: Gradle tests, Docker build + push to GHCR, 
-Trivy security scan, Terraform plan on PRs or apply on merges to main, and finally a commit that bumps the image 
+Add .github/workflows/ci-cd.yml. The pipeline runs five jobs in sequence: 
+- Gradle tests, 
+- Docker build + push to GHCR, 
+- Trivy security scan, 
+- Terraform plan on PRs or apply on merges to main, and finally a commit that bumps the image 
 tag in helm/service-a/values.yaml and helm/service-b/values.yaml. That last commit is the trigger for ArgoCD.
 Go to Settings → Secrets and variables → Actions and add AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and ACM_CERT_ARN. 
 GITHUB_TOKEN is provided automatically.

@@ -21,14 +21,14 @@ variable "app_secret_key_value" {
   type        = string
   sensitive   = true
   description = "Secret value stored in Secrets Manager for service-a"
-  default     = "change-me-before-production"
+  default     = "change-me-before-production-1"
 }
 
 variable "notification_api_key_value" {
   type        = string
   sensitive   = true
   description = "Secret value stored in Secrets Manager for service-b"
-  default     = "change-me-before-production"
+  default     = "change-me-before-production-1"
 }
 
 variable "tags" {

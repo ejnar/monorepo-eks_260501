@@ -1,7 +1,12 @@
 replicaCount: 2
 
+# Set to pull secret name if GHCR package is private.
+# Leave empty if package is public.
+imagePullSecrets: []
+#  - name: ghcr-pull-secret
+
 image:
-  repository: ghcr.io/ejnar/service-b
+  repository: "" # ghcr.io/your-org/service-b
   pullPolicy: IfNotPresent
   tag: "latest"
 
